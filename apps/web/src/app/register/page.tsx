@@ -23,8 +23,8 @@ export default function RegisterPage() {
 
     try {
       await apiClient.post("/auth/register", { email, password, display_name: displayName });
-      const res = await apiClient.post<{ access_token: string }>("/auth/login", { email, password });
-      await login(res.access_token);
+      const res = await apiClient.post<{ accessToken: string }>("/auth/login", { email, password });
+      await login(res.accessToken);
       router.push("/closet");
     } catch (err) {
       setError(err instanceof Error ? err.message : "회원가입에 실패했습니다.");

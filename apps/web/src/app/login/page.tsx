@@ -21,8 +21,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await apiClient.post<{ access_token: string }>("/auth/login", { email, password });
-      await login(res.access_token);
+      const res = await apiClient.post<{ accessToken: string }>("/auth/login", { email, password });
+      await login(res.accessToken);
       router.push("/closet");
     } catch (err) {
       setError(err instanceof Error ? err.message : "로그인에 실패했습니다.");

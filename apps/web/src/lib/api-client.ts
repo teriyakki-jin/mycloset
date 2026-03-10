@@ -40,6 +40,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new Error(error || `HTTP ${response.status}`);
   }
 
+  if (response.status === 204) return undefined as T;
   const data = await response.json();
   return camelizeKeys(data) as T;
 }

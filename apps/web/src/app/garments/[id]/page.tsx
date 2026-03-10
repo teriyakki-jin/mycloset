@@ -25,6 +25,7 @@ export default function GarmentDetailPage() {
   const [loading, setLoading] = useState(true);
   const [logging, setLogging] = useState(false);
   const [logDone, setLogDone] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!token) return;
@@ -34,6 +35,19 @@ export default function GarmentDetailPage() {
       .catch(() => router.push("/closet"))
       .finally(() => setLoading(false));
   }, [id, token, router]);
+
+  async function handleDelete() {
+    if (!token || !garment) return;
+    if (!confirm(`"${garment.name}"을(를) 삭제할까요?`)) return;
+    setDeleting(true);
+    try {
+      await apiClient.delete(`/garments/${garment.id}`, { token });
+      router.push("/closet");
+    } catch {
+      alert("삭제에 실패했습니다.");
+      setDeleting(false);
+    }
+  }
 
   async function handleWearLog() {
     if (!token || !garment) return;
@@ -64,7 +78,7 @@ export default function GarmentDetailPage() {
 
   if (!garment) return null;
 
-  const imageUrl = garment.cutoutImageUrl ?? garment.originalImageUrl;
+  const imageUrl = garment.cutoutImageUrl ?? garment.originalImageUrl ?? "";
 
   return (
     <div className="px-4 py-5 max-w-md mx-auto">
@@ -143,6 +157,17 @@ export default function GarmentDetailPage() {
           disabled={logDone}
         >
           {logDone ? "기록 완료 ✓" : "오늘 입었어요"}
+        </Button>
+      </div>
+
+      <div className="mt-3">
+        <Button
+          variant="secondary"
+          className="w-full text-red-500 hover:text-red-600"
+          loading={deleting}
+          onClick={handleDelete}
+        >
+          삭제
         </Button>
       </div>
     </div>

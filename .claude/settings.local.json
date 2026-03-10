@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude:*)",
+      "Bash(git:*)",
+      "Bash(docker:*)",
+      "Bash(pnpm:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(sed:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(py:*)",
+      "Bash(uv run:*)",
+      "Bash(~/.local/bin/uv sync:*)",
+      "Bash(~/.local/bin/uv python:*)",
+      "Bash(rm:*)",
+      "Bash(npx tsc:*)",
+      "Bash(~/.local/bin/uv run:*)",
+      "Bash(~/.local/bin/uv add:*)",
+      "Bash(.venv/Scripts/pip install:*)"
+    ]
+  }
+}

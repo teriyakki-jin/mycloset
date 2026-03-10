@@ -1,7 +1,9 @@
 import uuid
 from typing import Optional
 
+import httpx
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from pydantic import BaseModel, HttpUrl
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +12,7 @@ from src.models.garment import Garment
 from src.models.user import User
 from src.schemas.garment import GarmentCreateResponse, GarmentListResponse, GarmentUpdateRequest
 from src.services.storage_service import storage_service
+from src.services.url_scraper import scrape_product
 
 router = APIRouter(prefix="/garments", tags=["garments"])
 
@@ -39,6 +42,51 @@ async def upload_garment(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
         name=file.filename or "새 옷",
+        original_image_url=image_url,
+        processing_status="pending",
+    )
+    db.add(garment)
+    await db.flush()
+    await db.commit()
+
+    from src.services.queue_service import enqueue_image_processing
+    await enqueue_image_processing(garment.id)
+
+    return garment
+
+
+class ImportUrlRequest(BaseModel):
+    url: str
+
+
+@router.post("/import-url", response_model=GarmentCreateResponse, status_code=status.HTTP_201_CREATED)
+async def import_from_url(
+    body: ImportUrlRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    try:
+        product = await scrape_product(body.url)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
+
+    # 이미지 다운로드
+    try:
+        async with httpx.AsyncClient(timeout=20, follow_redirects=True) as client:
+            img_resp = await client.get(product.image_url)
+            img_resp.raise_for_status()
+            image_data = img_resp.content
+            content_type = img_resp.headers.get("content-type", "image/jpeg").split(";")[0]
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="상품 이미지를 다운로드할 수 없습니다.")
+
+    image_url = storage_service.upload_file(image_data, content_type, prefix="originals")
+
+    garment = Garment(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        name=product.name,
+        brand=product.brand,
         original_image_url=image_url,
         processing_status="pending",
     )
