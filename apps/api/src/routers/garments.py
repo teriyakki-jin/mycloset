@@ -44,8 +44,10 @@ async def upload_garment(
     )
     db.add(garment)
     await db.flush()
+    await db.commit()
 
-    # TODO: arq worker에 process_garment_image enqueue (Phase 3)
+    from src.services.queue_service import enqueue_image_processing
+    await enqueue_image_processing(garment.id)
 
     return garment
 
