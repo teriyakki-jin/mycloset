@@ -25,6 +25,7 @@ class Settings(BaseSettings):
 
     # AI
     openai_api_key: str = ""
+    hf_token: str = ""
 
 
 settings = Settings()

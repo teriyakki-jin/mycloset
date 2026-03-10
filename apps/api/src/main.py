@@ -11,6 +11,7 @@ from src.routers.health import router as health_router
 from src.routers.recommendations import router as recommendations_router
 from src.routers.wear_logs import router as wear_logs_router
 from src.routers.style import router as style_router
+from src.routers.tryon import router as tryon_router
 
 
 @asynccontextmanager
@@ -37,3 +38,4 @@ app.include_router(garments_router)
 app.include_router(recommendations_router)
 app.include_router(wear_logs_router)
 app.include_router(style_router)
+app.include_router(tryon_router)

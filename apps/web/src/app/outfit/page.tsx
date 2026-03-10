@@ -142,8 +142,9 @@ export default function OutfitPage() {
       )}
 
       {outfits.length === 0 && !loading && (
-        <div className="text-center py-10 text-slate-400 text-sm">
-          위 버튼을 눌러 오늘의 코디를 추천받아보세요.
+        <div className="text-center py-10 text-slate-400 text-sm space-y-1">
+          <p>위 버튼을 눌러 오늘의 코디를 추천받아보세요.</p>
+          <p className="text-xs text-slate-300">상의·하의가 각 1개 이상 있어야 코디를 구성할 수 있어요.</p>
         </div>
       )}
     </div>

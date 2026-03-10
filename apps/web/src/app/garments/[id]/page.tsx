@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { apiClient } from "@/lib/api-client";
+import { API_URL } from "@/lib/constants";
 import type { Garment, GarmentCategory, Season } from "@/types";
 
 const SEASON_LABEL: Record<Season, string> = {
@@ -26,6 +27,14 @@ export default function GarmentDetailPage() {
   const [logging, setLogging] = useState(false);
   const [logDone, setLogDone] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // 가상 피팅 상태
+  const personInputRef = useRef<HTMLInputElement>(null);
+  const [personPreview, setPersonPreview] = useState<string | null>(null);
+  const [personUrl, setPersonUrl] = useState<string | null>(null);
+  const [tryonLoading, setTryonLoading] = useState(false);
+  const [tryonResult, setTryonResult] = useState<string | null>(null);
+  const [tryonError, setTryonError] = useState("");
 
   useEffect(() => {
     if (!token) return;
@@ -63,6 +72,47 @@ export default function GarmentDetailPage() {
     } catch {
     } finally {
       setLogging(false);
+    }
+  }
+
+  async function handlePersonSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !token) return;
+
+    setPersonPreview(URL.createObjectURL(file));
+    setTryonResult(null);
+    setTryonError("");
+
+    // 서버에 업로드해서 URL 받기
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`${API_URL}/tryon/upload-person`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setPersonUrl(data.url);
+    }
+  }
+
+  async function handleTryon() {
+    if (!token || !garment || !personUrl) return;
+    setTryonLoading(true);
+    setTryonResult(null);
+    setTryonError("");
+    try {
+      const data = await apiClient.post<{ resultUrl: string }>(
+        "/tryon",
+        { garment_id: garment.id, person_image_url: personUrl },
+        { token }
+      );
+      setTryonResult(data.resultUrl);
+    } catch (err) {
+      setTryonError(err instanceof Error ? err.message : "가상 피팅 처리 중 오류가 발생했습니다.");
+    } finally {
+      setTryonLoading(false);
     }
   }
 
@@ -140,6 +190,58 @@ export default function GarmentDetailPage() {
       {garment.notes && (
         <p className="mt-4 text-sm text-slate-600 bg-slate-50 rounded-xl px-4 py-3">{garment.notes}</p>
       )}
+
+      {/* 가상 피팅 섹션 */}
+      <div className="mt-6 border border-slate-200 rounded-2xl p-4">
+        <p className="text-sm font-semibold text-slate-800 mb-3">가상 피팅</p>
+        <p className="text-xs text-slate-400 mb-3">내 사진을 올리면 AI가 이 옷을 입혀드립니다. (30~60초 소요)</p>
+
+        <input
+          ref={personInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handlePersonSelect}
+        />
+
+        <button
+          onClick={() => personInputRef.current?.click()}
+          className="w-full border-2 border-dashed border-slate-200 rounded-xl py-4 flex flex-col items-center gap-1 hover:border-slate-400 transition-colors overflow-hidden relative"
+        >
+          {personPreview ? (
+            <div className="relative w-full aspect-[3/4]">
+              <Image src={personPreview} alt="내 사진" fill className="object-cover rounded-lg" />
+            </div>
+          ) : (
+            <>
+              <span className="text-2xl">🧍</span>
+              <p className="text-xs text-slate-400">내 사진 선택 (전신 또는 상반신)</p>
+            </>
+          )}
+        </button>
+
+        {tryonError && (
+          <p className="mt-2 text-xs text-red-500">{tryonError}</p>
+        )}
+
+        <Button
+          className="w-full mt-3"
+          disabled={!personUrl || tryonLoading}
+          loading={tryonLoading}
+          onClick={handleTryon}
+        >
+          {tryonLoading ? "AI 피팅 중... (최대 1분)" : "입어보기"}
+        </Button>
+
+        {tryonResult && (
+          <div className="mt-4">
+            <p className="text-xs text-slate-400 mb-2">피팅 결과</p>
+            <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100">
+              <Image src={tryonResult} alt="피팅 결과" fill className="object-cover" />
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="mt-6 flex gap-3">
         <Button

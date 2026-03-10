@@ -6,17 +6,17 @@ import { useAuth } from "@/contexts/auth-context";
 import { apiClient } from "@/lib/api-client";
 
 interface StyleReport {
-  total_garments: number;
-  top_colors: { color: string; count: number }[];
-  category_distribution: { category: string; count: number; pct: number }[];
-  formality_avg: number | null;
-  casual_ratio: number;
-  formal_ratio: number;
-  unworn_60d_count: number;
-  top_style_tags: string[];
-  missing_categories: string[];
-  total_wear_logs: number;
-  most_worn_garment: { name: string; wear_count: number } | null;
+  totalGarments: number;
+  topColors: { color: string; count: number }[];
+  categoryDistribution: { category: string; count: number; pct: number }[];
+  formalityAvg: number | null;
+  casualRatio: number;
+  formalRatio: number;
+  unworn60dCount: number;
+  topStyleTags: string[];
+  missingCategories: string[];
+  totalWearLogs: number;
+  mostWornGarment: { name: string; wearCount: number } | null;
   summary: string;
 }
 
@@ -84,11 +84,11 @@ export default function StyleReportPage() {
   }
 
   const formalityLabel =
-    report.formality_avg === null
+    report.formalityAvg === null
       ? "-"
-      : report.formality_avg < 0.35
+      : report.formalityAvg < 0.35
       ? "캐주얼"
-      : report.formality_avg > 0.65
+      : report.formalityAvg > 0.65
       ? "포멀"
       : "믹스";
 
@@ -103,18 +103,18 @@ export default function StyleReportPage() {
 
       {/* 주요 지표 */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard label="보유 아이템" value={report.total_garments} sub="개" />
-        <StatCard label="총 착용 기록" value={report.total_wear_logs} sub="회" />
-        <StatCard label="미착용 (60일)" value={report.unworn_60d_count} sub="개" />
+        <StatCard label="보유 아이템" value={report.totalGarments} sub="개" />
+        <StatCard label="총 착용 기록" value={report.totalWearLogs} sub="회" />
+        <StatCard label="미착용 (60일)" value={report.unworn60dCount} sub="개" />
         <StatCard label="스타일 성향" value={formalityLabel} />
       </div>
 
       {/* 색상 팔레트 */}
-      {report.top_colors.length > 0 && (
+      {report.topColors.length > 0 && (
         <Card className="p-4">
           <p className="text-sm font-semibold text-slate-800 mb-3">대표 색상</p>
-          <div className="flex gap-3">
-            {report.top_colors.map((c) => (
+          <div className="flex gap-3 flex-wrap">
+            {report.topColors.map((c) => (
               <div key={c.color} className="flex flex-col items-center gap-1">
                 <div
                   className="w-10 h-10 rounded-full border border-slate-200 shadow-sm"
@@ -128,19 +128,19 @@ export default function StyleReportPage() {
       )}
 
       {/* 카테고리 분포 */}
-      {report.category_distribution.length > 0 && (
+      {report.categoryDistribution.length > 0 && (
         <Card className="p-4">
           <p className="text-sm font-semibold text-slate-800 mb-3">카테고리 분포</p>
-          <BarChart items={report.category_distribution} />
+          <BarChart items={report.categoryDistribution} />
         </Card>
       )}
 
       {/* 스타일 태그 */}
-      {report.top_style_tags.length > 0 && (
+      {report.topStyleTags.length > 0 && (
         <Card className="p-4">
           <p className="text-sm font-semibold text-slate-800 mb-3">주요 스타일 키워드</p>
           <div className="flex flex-wrap gap-2">
-            {report.top_style_tags.map((tag) => (
+            {report.topStyleTags.map((tag) => (
               <span key={tag} className="text-sm bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
                 #{tag}
               </span>
@@ -150,20 +150,20 @@ export default function StyleReportPage() {
       )}
 
       {/* 최다 착용 */}
-      {report.most_worn_garment && (
+      {report.mostWornGarment && (
         <Card className="p-4">
           <p className="text-sm font-semibold text-slate-800 mb-1">가장 많이 입은 옷</p>
-          <p className="text-slate-700">{report.most_worn_garment.name}</p>
-          <p className="text-xs text-slate-400 mt-0.5">{report.most_worn_garment.wear_count}회 착용</p>
+          <p className="text-slate-700">{report.mostWornGarment.name}</p>
+          <p className="text-xs text-slate-400 mt-0.5">{report.mostWornGarment.wearCount}회 착용</p>
         </Card>
       )}
 
       {/* 보완 추천 */}
-      {report.missing_categories.length > 0 && (
+      {report.missingCategories.length > 0 && (
         <Card className="p-4">
           <p className="text-sm font-semibold text-slate-800 mb-2">보완이 필요한 아이템</p>
           <div className="flex flex-wrap gap-2">
-            {report.missing_categories.map((cat) => (
+            {report.missingCategories.map((cat) => (
               <span key={cat} className="text-sm border border-dashed border-slate-300 text-slate-500 px-3 py-1 rounded-full">
                 {cat} 추가하기
               </span>

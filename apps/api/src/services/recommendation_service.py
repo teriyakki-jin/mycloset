@@ -159,7 +159,30 @@ async def recommend_outfits(
 
         top = next((s for s in scored_tops if s.garment.id not in used_tops), None)
         bottom = next((s for s in scored_bottoms if s.garment.id not in used_bottoms), None)
+
+        # 상의나 하의 중 하나만 있어도 부분 추천
+        if not top and not bottom:
+            break
         if not top or not bottom:
+            item = top or bottom
+            if item:
+                outer = next(
+                    (s.garment for s in scored_outers if s.garment.id != item.garment.id),
+                    None
+                ) if (ctx.temp_celsius is not None and ctx.temp_celsius < 17) else None
+                explanation = _build_explanation(ctx, season, [item], outer)
+                explanation += " (하의/상의를 더 추가하면 완성도 높은 코디를 받을 수 있어요.)"
+                outfits.append(OutfitSet(
+                    top=top.garment if top else None,
+                    bottom=bottom.garment if bottom else None,
+                    outer=outer,
+                    score=item.score,
+                    explanation=explanation,
+                ))
+                if top:
+                    used_tops.add(top.garment.id)
+                if bottom:
+                    used_bottoms.add(bottom.garment.id)
             break
 
         needs_outer = ctx.temp_celsius is not None and ctx.temp_celsius < 17
