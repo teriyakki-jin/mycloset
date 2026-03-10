@@ -30,11 +30,11 @@
 
 ## 🏗️ 아키텍처
 
-```
+
 <img width="2802" height="1536" alt="Gemini_Generated_Image_mnhkt8mnhkt8mnhk" src="https://github.com/user-attachments/assets/98cf8bd7-7176-4c04-b4a8-a3ab98a75a34" />
 
 
-```
+
 
 ---
 
