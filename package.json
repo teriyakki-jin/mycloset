@@ -1,0 +1,14 @@
+{
+  "name": "closetiq",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter @closetiq/web dev",
+    "build:web": "pnpm --filter @closetiq/web build",
+    "lint": "pnpm --filter @closetiq/web lint",
+    "typecheck": "pnpm --filter @closetiq/web tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  }
+}
