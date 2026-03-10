@@ -4,11 +4,31 @@ interface RequestOptions extends RequestInit {
   token?: string;
 }
 
+// snake_case → camelCase 재귀 변환
+function toCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+function camelizeKeys(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(camelizeKeys);
+  if (obj !== null && typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
+        toCamel(k),
+        camelizeKeys(v),
+      ])
+    );
+  }
+  return obj;
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { token, ...init } = options;
 
   const headers = new Headers(init.headers);
-  headers.set("Content-Type", "application/json");
+  if (!(init.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }
@@ -20,7 +40,8 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new Error(error || `HTTP ${response.status}`);
   }
 
-  return response.json() as Promise<T>;
+  const data = await response.json();
+  return camelizeKeys(data) as T;
 }
 
 export const apiClient = {

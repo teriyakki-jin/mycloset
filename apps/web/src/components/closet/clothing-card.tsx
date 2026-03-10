@@ -14,7 +14,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export function ClothingCard({ garment }: ClothingCardProps) {
-  const imageUrl = garment.cutoutImageUrl ?? garment.originalImageUrl;
+  const imageUrl = garment.cutoutImageUrl ?? garment.originalImageUrl ?? "";
   const isProcessing = garment.processingStatus === "pending" || garment.processingStatus === "processing";
 
   return (

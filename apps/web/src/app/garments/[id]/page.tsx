@@ -87,23 +87,23 @@ export default function GarmentDetailPage() {
             {CATEGORY_LABEL[garment.category as GarmentCategory] ?? garment.category}
           </span>
         )}
-        {garment.seasons.map((s) => (
+        {(garment.seasons ?? []).map((s) => (
           <span key={s} className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full">
             {SEASON_LABEL[s as Season] ?? s}
           </span>
         ))}
-        {garment.styleTags.map((tag) => (
+        {(garment.styleTags ?? []).map((tag) => (
           <span key={tag} className="text-xs bg-slate-50 text-slate-500 px-2.5 py-1 rounded-full border border-slate-200">
             #{tag}
           </span>
         ))}
       </div>
 
-      {garment.dominantColors.length > 0 && (
+      {(garment.dominantColors ?? []).length > 0 && (
         <div className="mt-4">
           <p className="text-xs text-slate-400 mb-1.5">대표 색상</p>
           <div className="flex gap-2">
-            {garment.dominantColors.map((color) => (
+            {(garment.dominantColors ?? []).map((color) => (
               <div
                 key={color}
                 className="w-7 h-7 rounded-full border border-slate-200 shadow-sm"
