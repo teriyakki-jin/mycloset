@@ -5,16 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from src.database import engine
 from src.models import Base
+from src.routers.auth import router as auth_router
+from src.routers.garments import router as garments_router
 from src.routers.health import router as health_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # startup
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    # shutdown
     await engine.dispose()
 
 
@@ -29,3 +29,5 @@ app.add_middleware(
 )
 
 app.include_router(health_router)
+app.include_router(auth_router)
+app.include_router(garments_router)
