@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { AuthProvider } from "@/contexts/auth-context";
 import { APP_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -26,9 +27,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body className="bg-slate-50 min-h-screen">
-        <Header />
-        <main className="pb-20">{children}</main>
-        <BottomNav />
+        <AuthProvider>
+          <Header />
+          <main className="pb-20">{children}</main>
+          <BottomNav />
+        </AuthProvider>
       </body>
     </html>
   );
